@@ -686,6 +686,120 @@ body {
   text-align: center;
 }
 
+// ========== GRAMÁTICA GERADA ==========
+.section-grammar {
+  .card-header {
+    border-bottom-color: $color-warning;
+  }
+}
+
+.grammar-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.grammar-legend-item {
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.grammar-start {
+  background: linear-gradient(135deg, $color-primary 0%, $color-info 100%);
+  color: white;
+}
+
+.grammar-final {
+  background: #f4fff4;
+  color: $color-success;
+  border: 1px solid rgba(39, 174, 96, 0.35);
+}
+
+.grammar-rules {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.grammar-rule-card {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 1rem 1.1rem;
+  border-radius: 10px;
+  border: 1px solid $color-light;
+  background: #fbfbfd;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+
+  &.start {
+    border-left: 4px solid $color-primary;
+  }
+
+  &.final {
+    border-left: 4px solid $color-success;
+  }
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-start;
+  }
+}
+
+.grammar-rule-left {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 96px;
+}
+
+.grammar-nonterminal {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  padding: 0.45rem 0.75rem;
+  border-radius: 999px;
+  background: $color-light;
+  color: $color-dark;
+  font-weight: 700;
+  font-family: 'Courier New', monospace;
+}
+
+.grammar-arrow {
+  color: $color-primary;
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
+.grammar-rule-right {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem;
+  align-items: center;
+  padding-top: 0.1rem;
+  color: $color-dark;
+  font-weight: 500;
+}
+
+.grammar-production-line {
+  font-family: 'Courier New', monospace;
+  font-size: 0.98rem;
+  background: white;
+  border: 1px solid $color-light;
+  border-radius: 8px;
+  padding: 0.45rem 0.7rem;
+  width: 100%;
+}
+
+.grammar-separator {
+  color: $color-gray;
+  font-weight: 700;
+}
+
 // ========== TOKENS RECONHECIDOS ==========
 .section-recognized {
   .card-header {

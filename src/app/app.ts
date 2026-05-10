@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AutomatoService } from './services/automato.service';
+import { GrammarRule, GrammarService } from './services/grammar.service';
 import { State } from './models/state';
 
 @Component({
@@ -27,12 +28,7 @@ export class App implements OnInit {
     alphabet: string[];
     transitions: Map<string, Map<string, string>>;
   } | null = null;
-  grammarRules: Array<{
-    left: string;
-    productions: string[];
-    isStart: boolean;
-    isFinal: boolean;
-  }> = [];
+  grammarRules: GrammarRule[] = [];
 
   // ========== VALIDAÇÃO DE TOKENS ==========
   tokenToValidate: string = '';
@@ -56,7 +52,10 @@ export class App implements OnInit {
     totalTransitions: number;
   } | null = null;
 
-  constructor(private automatoService: AutomatoService) {}
+  constructor(
+    private automatoService: AutomatoService,
+    private grammarService: GrammarService
+  ) {}
 
   ngOnInit(): void {}
 
@@ -119,51 +118,11 @@ export class App implements OnInit {
     this.alphabet = this.automatoService.getAlphabet();
     this.transitionTable = this.automatoService.getTransitionTable();
     this.stats = this.automatoService.getAutomatoStats();
-    this.grammarRules = this.buildGrammarRules();
+    this.grammarRules = this.grammarService.buildGrammarRules(this.tokens);
 
     this.showAutomato = true;
     this.resetValidation();
     this.isValidating = true;
-  }
-
-  buildGrammarRules(): Array<{
-    left: string;
-    productions: string[];
-    isStart: boolean;
-    isFinal: boolean;
-  }> {
-    const rules: Array<{
-      left: string;
-      productions: string[];
-      isStart: boolean;
-      isFinal: boolean;
-    }> = [];
-
-    const stateIds = Array.from(this.states.keys()).sort((a, b) => a - b);
-
-    for (const stateId of stateIds) {
-      const state = this.states.get(stateId);
-      if (!state) continue;
-
-      const productions: string[] = [];
-
-      for (const [symbol, nextStateId] of state.transitions.entries()) {
-        productions.push(`${symbol} q${nextStateId}`);
-      }
-
-      if (state.isFinal) {
-        productions.push('ε');
-      }
-
-      rules.push({
-        left: `q${stateId}`,
-        productions,
-        isStart: stateId === 0,
-        isFinal: state.isFinal
-      });
-    }
-
-    return rules;
   }
 
   isStateFinal(stateId: number): boolean {

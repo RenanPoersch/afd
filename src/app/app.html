@@ -173,6 +173,41 @@
     </section>
     </div>
 
+    <!-- ========== SEÇÃO 4: GRAMÁTICA GERADA ========== -->
+    <section *ngIf="grammarRules.length > 0 && showAutomato" class="card section-grammar">
+      <div class="card-header">
+        <h2>Gramática Regular Gerada</h2>
+        <p class="section-description">
+          A gramática abaixo usa a forma clássica de gramática regular: símbolo inicial S, não-terminais maiúsculos e ε para estados finais.
+        </p>
+      </div>
+
+      <div class="card-body">
+        <div class="grammar-legend">
+          <div class="grammar-legend-item grammar-start">S = símbolo inicial</div>
+          <div class="grammar-legend-item grammar-final">ε = produção de aceitação</div>
+          <div class="grammar-legend-item">A, B, C... = não-terminais</div>
+        </div>
+
+        <div class="grammar-rules">
+          <div *ngFor="let rule of grammarRules" class="grammar-rule-card" [ngClass]="{ start: rule.isStart, final: rule.isFinal }">
+            <div class="grammar-rule-left">
+              <span class="grammar-nonterminal">{{ rule.left }}</span>
+              <span class="grammar-arrow">→</span>
+            </div>
+
+            <div class="grammar-rule-right">
+              <span class="grammar-production-line">
+                <span *ngFor="let production of rule.productions; let i = index">
+                  {{ production }}<span *ngIf="i < rule.productions.length - 1" class="grammar-separator"> | </span>
+                </span>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- ========== SEÇÃO 4: TOKENS VÁLIDOS RECONHECIDOS ========== -->
     <section *ngIf="validTokensRecognized.length > 0" class="card section-recognized">
       <div class="card-header">
