@@ -99,10 +99,11 @@ export class App implements OnInit {
   }
 
   /**
-   * Handle do pressionamento de Enter no input de tokens
+   * Handle do pressionamento de teclas no input de tokens
    */
   onTokenKeyPress(event: KeyboardEvent): void {
-    if (event.key === 'Enter') {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
       this.addToken();
     }
   }
@@ -242,6 +243,12 @@ export class App implements OnInit {
         this.tokenToValidate += symbol;
         return;
       }
+      if (event.key !== 'Enter' && event.key !== ' ') {
+        event.preventDefault();
+        this.validationResult = '❌ TOKEN INVÁLIDO - Símbolo não reconhecido!';
+        this.tokenToValidate = '';
+        return;
+      }
       return;
     }
 
@@ -260,6 +267,11 @@ export class App implements OnInit {
     // Aceitar apenas letras minúsculas
     if (!/^[a-z]$/.test(symbol)) {
       event.preventDefault();
+      if (event.key !== 'Enter' && event.key !== ' ') {
+        this.validationResult = '❌ TOKEN INVÁLIDO - Símbolo não reconhecido!';
+        this.tokenToValidate = '';
+        this.isValidating = false;
+      }
       return;
     }
 
@@ -269,6 +281,7 @@ export class App implements OnInit {
     if (!isValid) {
       // Rejeitar token: nenhuma transição válida
       this.validationResult = '❌ TOKEN INVÁLIDO - Símbolo não reconhecido!';
+      this.tokenToValidate = '';
       this.isValidating = false;
       return;
     }

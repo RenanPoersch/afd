@@ -20,7 +20,7 @@
             type="text"
             [(ngModel)]="newToken"
             (keypress)="onTokenKeyPress($event)"
-            placeholder="Digite um token (ex: casa, carro, gato)"
+            placeholder="Digite um token..."
             class="input-field"
             maxlength="50"
           />
@@ -145,7 +145,7 @@
               (keydown)="onValidationKeyPress($event)"
               placeholder="Digite..."
               class="input-field input-validation"
-              readonly
+              autofocus
             />
             <span class="input-help">Estado atual: <strong>q{{ currentValidationState }}</strong></span>
           </div>
