@@ -307,6 +307,7 @@ export class App implements OnInit {
     }
 
     this.isValidating = false;
+    this.tokenToValidate = '';
   }
 
   /**

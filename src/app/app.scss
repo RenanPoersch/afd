@@ -131,7 +131,7 @@ body {
   display: flex;
   gap: 1rem;
   margin-bottom: 1.5rem;
-  flex-wrap: wrap;
+  flex-direction: column;
 
   @media (max-width: 768px) {
     flex-direction: column;
@@ -162,8 +162,10 @@ body {
 }
 
 .input-validation {
-  background-color: #f8f9fa;
-  border: 2px dashed $color-primary;
+  display: block;
+  width: 100%;
+  background-color: white;
+  border: 2px solid $color-primary;
   padding: 1rem;
   font-family: 'Courier New', monospace;
   font-size: 1.1rem;
@@ -539,6 +541,8 @@ body {
 
 // ========== VALIDAÇÃO ==========
 .validation-input-group {
+  display: block;
+  width: 100%;
   margin-bottom: 1.5rem;
 }
 
@@ -591,9 +595,9 @@ body {
 
 .steps-timeline {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5rem;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.6rem;
   padding: 1rem;
   background: white;
   border-radius: 8px;
@@ -605,38 +609,37 @@ body {
   }
 }
 
-.step {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+.step-line {
+  display: block;
+  width: 100%;
+  padding: 0.6rem 0.85rem;
+  border-left: 4px solid $color-primary;
+  background: $color-light;
+  border-radius: 6px;
+  font-weight: 600;
+  font-family: 'Courier New', monospace;
+  color: $color-dark;
+}
 
-  &.step-start {
-    .step-state {
-      background: linear-gradient(135deg, $color-primary 0%, $color-info 100%);
-      color: white;
-      font-weight: 700;
-    }
+.step-start-line {
+  background: linear-gradient(135deg, $color-primary 0%, $color-info 100%);
+  color: white;
+  border-left-color: $color-info;
+}
+
+.step-result-line {
+  border-left-color: $color-success;
+
+  &.valid {
+    background-color: #efe;
+    color: $color-success;
+    border-left-color: $color-success;
   }
 
-  &.step-end {
-    .step-result {
-      padding: 0.75rem 1.5rem;
-      border-radius: 20px;
-      font-weight: 700;
-      text-align: center;
-
-      &.valid {
-        background-color: #efe;
-        color: $color-success;
-        border: 2px solid $color-success;
-      }
-
-      &.invalid {
-        background-color: #fee;
-        color: $color-danger;
-        border: 2px solid $color-danger;
-      }
-    }
+  &.invalid {
+    background-color: #fee;
+    color: $color-danger;
+    border-left-color: $color-danger;
   }
 }
 
@@ -789,5 +792,23 @@ body {
 
   .step-arrow {
     display: none;
+  }
+}
+
+// ========== LAYOUT LADO A LADO ==========
+.sections-wrapper {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-bottom: 2rem;
+
+  @media (max-width: 1200px) {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 1rem;
   }
 }

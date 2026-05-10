@@ -72,106 +72,93 @@
       </div>
     </section>
 
-    <!-- ========== SEÇÃO 2: VISUALIZAÇÃO DO AUTÔMATO ========== -->
-    <section *ngIf="showAutomato" class="card section-automato">
-      <div class="card-header">
-        <h2>2. Autômato Finito Determinístico</h2>
-        <p class="section-description">
-          Estrutura automática gerada a partir dos tokens. Estados finais marcados com ✓.
-        </p>
-      </div>
-
-      <div class="card-body">
-        <!-- Estatísticas -->
-        <div *ngIf="stats" class="stats-grid">
-          <div class="stat-card">
-            <span class="stat-value">{{ stats.totalStates }}</span>
-            <span class="stat-label">Estados</span>
-          </div>
-          <div class="stat-card">
-            <span class="stat-value">{{ stats.totalFinalStates }}</span>
-            <span class="stat-label">Estados Finais</span>
-          </div>
-          <div class="stat-card">
-            <span class="stat-value">{{ stats.alphabetSize }}</span>
-            <span class="stat-label">Símbolos (Alfabeto)</span>
-          </div>
-          <div class="stat-card">
-            <span class="stat-value">{{ stats.totalTransitions }}</span>
-            <span class="stat-label">Transições</span>
-          </div>
+    <!-- ========== SEÇÕES 2 E 3: AUTÔMATO E VALIDAÇÃO LADO A LADO ========== -->
+    <div *ngIf="showAutomato" class="sections-wrapper">
+      <!-- SEÇÃO 2: VISUALIZAÇÃO DO AUTÔMATO -->
+      <section class="card section-automato">
+        <div class="card-header">
+          <h2>2. Autômato Finito Determinístico</h2>
+          <p class="section-description">
+            Estrutura automática gerada a partir dos tokens. Estados finais marcados com ✓.
+          </p>
         </div>
 
-        <!-- Estados do Autômato -->
-        <div class="automato-visualization">
-          <h3>Estados e Transições:</h3>
-          <div class="states-container">
-            <div
-              *ngFor="let state of states | keyvalue"
-              class="state-node"
-              [ngStyle]="showValidation ? getStateStyle(state.value.id) : {}"
-            >
-              <span class="state-label">q{{ state.value.id }}</span>
-              <span class="state-icon" *ngIf="isStateFinal(state.value.id)">✓</span>
+        <div class="card-body">
+          <!-- Estatísticas -->
+          <div *ngIf="stats" class="stats-grid">
+            <div class="stat-card">
+              <span class="stat-value">{{ stats.totalStates }}</span>
+              <span class="stat-label">Estados</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-value">{{ stats.totalFinalStates }}</span>
+              <span class="stat-label">Estados Finais</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-value">{{ stats.alphabetSize }}</span>
+              <span class="stat-label">Símbolos (Alfabeto)</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-value">{{ stats.totalTransitions }}</span>
+              <span class="stat-label">Transições</span>
             </div>
           </div>
-        </div>
-
-        <!-- Tabela de Transição -->
-        <div *ngIf="transitionTable" class="transition-table-container">
-          <h3>Tabela de Transição δ(q, σ):</h3>
-          <div class="table-wrapper">
-            <table class="transition-table">
-              <thead>
-                <tr>
-                  <th class="state-column">Estado</th>
-                  <th *ngFor="let symbol of transitionTable.alphabet" class="symbol-column">
-                    {{ symbol }}
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr
-                  *ngFor="let state of transitionTable.states"
-                  [ngClass]="{ 'final-state': isStateFinal(state) }"
-                >
-                  <td class="state-label-cell">
-                    q{{ state }}<span *ngIf="isStateFinal(state)" class="final-marker">*</span>
-                  </td>
-                  <td *ngFor="let symbol of transitionTable.alphabet">
-                    {{ getTransitionValue(state, symbol) }}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+          
+          <!-- Tabela de Transição -->
+          <div *ngIf="transitionTable" class="transition-table-container">
+            <h3>Tabela de Transição δ(q, σ):</h3>
+            <div class="table-wrapper">
+              <table class="transition-table">
+                <thead>
+                  <tr>
+                    <th class="state-column">Estado</th>
+                    <th *ngFor="let symbol of transitionTable.alphabet" class="symbol-column">
+                      {{ symbol }}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    *ngFor="let state of transitionTable.states"
+                    [ngClass]="{ 'final-state': isStateFinal(state) }"
+                  >
+                    <td class="state-label-cell">
+                      q{{ state }}<span *ngIf="isStateFinal(state)" class="final-marker">*</span>
+                    </td>
+                    <td *ngFor="let symbol of transitionTable.alphabet">
+                      {{ getTransitionValue(state, symbol) }}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="table-note">* = Estado final | - = Nenhuma transição</p>
           </div>
-          <p class="table-note">* = Estado final | - = Nenhuma transição</p>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- ========== SEÇÃO 3: VALIDAÇÃO DE TOKENS ========== -->
-    <section *ngIf="showAutomato" class="card section-validation">
-      <div class="card-header">
-        <h2>✓ 3. Validação de Token (AFD em Ação)</h2>
-        <p class="section-description">
-          Digite caracteres (a-z). Pressione Enter ou Espaço para finalizar.
-        </p>
-      </div>
-
-      <div class="card-body">
-        <!-- Input de validação -->
-        <div class="validation-input-group">
-          <input
-            type="text"
-            [(ngModel)]="tokenToValidate"
-            (keydown)="onValidationKeyPress($event)"
-            placeholder="Digite aqui... (Enter ou Espaço para finalizar)"
-            class="input-field input-validation"
-            readonly
-          />
-          <span class="input-help">Estado atual: <strong>q{{ currentValidationState }}</strong></span>
+      <!-- SEÇÃO 3: VALIDAÇÃO DE TOKENS -->
+      <section class="card section-validation">
+        <div class="card-header">
+          <h2>✓ 3. Validação de Token (AFD em Ação)</h2>
+          <p class="section-description">
+            Digite caracteres (a-z). Pressione Enter ou Espaço para finalizar.
+          </p>
         </div>
+
+        <div class="card-body">
+          <!-- Input de validação -->
+          <div class="validation-input-group">
+            <input
+              type="text"
+              [(ngModel)]="tokenToValidate"
+              (keydown)="onValidationKeyPress($event)"
+              placeholder="Digite aqui... (Enter ou Espaço para finalizar)"
+              class="input-field input-validation"
+              readonly
+            />
+            <span class="input-help">Estado atual: <strong>q{{ currentValidationState }}</strong></span>
+          </div>
 
         <!-- Resultado da validação -->
         <div *ngIf="validationResult" class="validation-result" [ngClass]="{ valid: validationResult.includes('✅'), invalid: validationResult.includes('❌') }">
@@ -182,22 +169,18 @@
         <div *ngIf="validationSteps.length > 0" class="validation-steps">
           <h3>Transições Realizadas:</h3>
           <div class="steps-timeline">
-            <div class="step step-start">
-              <div class="step-state">q0</div>
-              <div class="step-label">Início</div>
+            <div class="step-line step-start-line">q0 -> início</div>
+
+            <div *ngFor="let step of validationSteps" class="step-line">
+              q{{ step.to }} -> {{ step.symbol }}
             </div>
 
-            <div *ngFor="let step of validationSteps" class="step">
-              <div class="step-arrow">→</div>
-              <div class="step-symbol">{{ step.symbol }}</div>
-              <div class="step-arrow">→</div>
-              <div class="step-state">q{{ step.to }}</div>
-            </div>
-
-            <div *ngIf="validationResult" class="step step-end">
-              <div class="step-result" [ngClass]="{ valid: validationResult.includes('✅'), invalid: validationResult.includes('❌') }">
-                {{ validationResult.includes('✅') ? '✅ ACEITO' : '❌ REJEITADO' }}
-              </div>
+            <div
+              *ngIf="validationResult"
+              class="step-line step-result-line"
+              [ngClass]="{ valid: validationResult.includes('✅'), invalid: validationResult.includes('❌') }"
+            >
+              {{ validationResult.includes('✅') ? '✅ ACEITO' : '❌ REJEITADO' }}
             </div>
           </div>
         </div>
@@ -205,6 +188,7 @@
 
       </div>
     </section>
+    </div>
 
     <!-- ========== SEÇÃO 4: TOKENS VÁLIDOS RECONHECIDOS ========== -->
     <section *ngIf="validTokensRecognized.length > 0" class="card section-recognized">
