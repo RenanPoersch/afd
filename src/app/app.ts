@@ -336,4 +336,13 @@ export class App implements OnInit {
   getFinalStateIcon(stateId: number): string {
     return this.isStateFinal(stateId) ? ' ✓' : '';
   }
+
+  /**
+   * Obtém o valor da transição da tabela
+   */
+  getTransitionValue(stateId: number, symbol: string): string {
+    if (!this.transitionTable) return '-';
+    const stateLabel = `q${stateId}`;
+    return this.transitionTable.transitions.get(stateLabel)?.get(symbol) || '-';
+  }
 }
