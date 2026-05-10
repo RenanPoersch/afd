@@ -2,8 +2,7 @@
   <!-- CABEÇALHO -->
   <header class="app-header">
     <div class="header-content">
-      <h1>Analisador Léxico - Autômato Finito Determinístico</h1>
-      <p class="subtitle">Projeto Didático de Linguagens Formais</p>
+      <h1>Analisador Léxico</h1>
     </div>
   </header>
 
@@ -11,10 +10,7 @@
     <!-- ========== SEÇÃO 1: CADASTRO DE TOKENS ========== -->
     <section class="card section-tokens">
       <div class="card-header">
-        <h2>1. Cadastro de Tokens</h2>
-        <p class="section-description">
-          Adicione tokens válidos (apenas letras minúsculas a-z). O autômato será construído automaticamente.
-        </p>
+        <h2>Cadastro de Tokens</h2>
       </div>
 
       <div class="card-body">
@@ -77,10 +73,7 @@
       <!-- SEÇÃO 2: VISUALIZAÇÃO DO AUTÔMATO -->
       <section class="card section-automato">
         <div class="card-header">
-          <h2>2. Autômato Finito Determinístico</h2>
-          <p class="section-description">
-            Estrutura automática gerada a partir dos tokens. Estados finais marcados com ✓.
-          </p>
+          <h2>Autômato Finito Determinístico</h2>
         </div>
 
         <div class="card-body">
@@ -140,10 +133,7 @@
       <!-- SEÇÃO 3: VALIDAÇÃO DE TOKENS -->
       <section class="card section-validation">
         <div class="card-header">
-          <h2>✓ 3. Validação de Token (AFD em Ação)</h2>
-          <p class="section-description">
-            Digite caracteres (a-z). Pressione Enter ou Espaço para finalizar.
-          </p>
+          <h2>Validação</h2>
         </div>
 
         <div class="card-body">
@@ -153,7 +143,7 @@
               type="text"
               [(ngModel)]="tokenToValidate"
               (keydown)="onValidationKeyPress($event)"
-              placeholder="Digite aqui... (Enter ou Espaço para finalizar)"
+              placeholder="Digite..."
               class="input-field input-validation"
               readonly
             />
@@ -205,17 +195,6 @@
       </div>
     </section>
   </main>
-
-  <!-- RODAPÉ -->
-  <footer class="app-footer">
-    <p>
-      <strong>Componentes Didáticos:</strong> Interface Angular Standalone | Serviço AutomatoService |
-      Algoritmo AFD | Tabela de Transição δ(q,σ)
-    </p>
-    <p class="footer-note">
-      Projeto acadêmico de Autômatos Finitos e Análise Léxica - Linguagens Formais
-    </p>
-  </footer>
 </div>
 
 
