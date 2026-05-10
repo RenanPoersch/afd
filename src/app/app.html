@@ -147,18 +147,11 @@
           </div>
           <p class="table-note">* = Estado final | - = Nenhuma transição</p>
         </div>
-
-        <!-- Botão para validação -->
-        <div class="button-group">
-          <button (click)="startValidation()" class="btn btn-info">
-            ✍️ Validar Novo Token
-          </button>
-        </div>
       </div>
     </section>
 
     <!-- ========== SEÇÃO 3: VALIDAÇÃO DE TOKENS ========== -->
-    <section *ngIf="showValidation" class="card section-validation">
+    <section *ngIf="showAutomato" class="card section-validation">
       <div class="card-header">
         <h2>✓ 3. Validação de Token (AFD em Ação)</h2>
         <p class="section-description">
@@ -168,14 +161,14 @@
 
       <div class="card-body">
         <!-- Input de validação -->
-        <div *ngIf="isValidating" class="validation-input-group">
+        <div class="validation-input-group">
           <input
             type="text"
             [(ngModel)]="tokenToValidate"
             (keydown)="onValidationKeyPress($event)"
             placeholder="Digite aqui... (Enter ou Espaço para finalizar)"
             class="input-field input-validation"
-            disabled
+            readonly
           />
           <span class="input-help">Estado atual: <strong>q{{ currentValidationState }}</strong></span>
         </div>
@@ -209,12 +202,7 @@
           </div>
         </div>
 
-        <!-- Botões de ação -->
-        <div *ngIf="!isValidating && validationResult" class="button-group">
-          <button (click)="validateAnother()" class="btn btn-primary">
-            Validar Outro Token
-          </button>
-        </div>
+
       </div>
     </section>
 

@@ -46,7 +46,6 @@ export class App implements OnInit {
 
   // ========== UI STATE ==========
   showAutomato: boolean = false;
-  showValidation: boolean = false;
   duplicateTokenError: string = '';
   stats: {
     totalStates: number;
@@ -97,7 +96,6 @@ export class App implements OnInit {
     this.tokens.push(filteredToken);
     this.newToken = '';
     this.showAutomato = false;
-    this.showValidation = false;
   }
 
   /**
@@ -115,7 +113,6 @@ export class App implements OnInit {
   removeToken(index: number): void {
     this.tokens.splice(index, 1);
     this.showAutomato = false;
-    this.showValidation = false;
     this.duplicateTokenError = '';
   }
 
@@ -126,7 +123,6 @@ export class App implements OnInit {
     this.tokens = [];
     this.validTokensRecognized = [];
     this.showAutomato = false;
-    this.showValidation = false;
     this.duplicateTokenError = '';
     this.states.clear();
     this.finalStates.clear();
@@ -158,7 +154,8 @@ export class App implements OnInit {
     this.stats = this.automatoService.getAutomatoStats();
 
     this.showAutomato = true;
-    this.showValidation = false;
+    this.resetValidation();
+    this.isValidating = true;
   }
 
   /**
@@ -177,19 +174,7 @@ export class App implements OnInit {
 
   // ========== MÉTODOS DE VALIDAÇÃO DE TOKENS ==========
 
-  /**
-   * Inicia a validação de um novo token
-   */
-  startValidation(): void {
-    if (!this.showAutomato) {
-      alert('Construa o autômato primeiro!');
-      return;
-    }
 
-    this.isValidating = true;
-    this.showValidation = true;
-    this.resetValidation();
-  }
 
   /**
    * Reseta o estado de validação
@@ -240,8 +225,26 @@ export class App implements OnInit {
    * Handle do pressionamento de teclas no input de validação
    * 
    * Enter ou Espaço finalizam a validação
+   * Se houver resultado e o usuário digita novamente, inicia nova validação automaticamente
    */
   onValidationKeyPress(event: KeyboardEvent): void {
+    // Se há um resultado anterior e o usuário começa a digitar, resetar automaticamente
+    if (!this.isValidating && this.validationResult) {
+      const symbol = event.key.toLowerCase();
+      
+      // Apenas letras minúsculas disparam novo reset
+      if (/^[a-z]$/.test(symbol)) {
+        event.preventDefault();
+        this.resetValidation();
+        this.isValidating = true;
+        // Processar o primeiro caractere da nova validação
+        this.processValidationSymbol(symbol);
+        this.tokenToValidate += symbol;
+        return;
+      }
+      return;
+    }
+
     if (!this.isValidating) return;
 
     // Enter ou Espaço finalizam a validação
@@ -304,14 +307,6 @@ export class App implements OnInit {
     }
 
     this.isValidating = false;
-  }
-
-  /**
-   * Inicia uma nova validação
-   */
-  validateAnother(): void {
-    this.resetValidation();
-    this.isValidating = true;
   }
 
   /**
