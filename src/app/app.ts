@@ -138,85 +138,13 @@ export class App implements OnInit {
     this.automatoService.clearValidationHistory();
   }
 
-  /**
-   * PROCESSA UM SÍMBOLO DURANTE A VALIDAÇÃO
-  /**
-   * Valida caracteres inseridos no input em tempo real
-   */
-  onValidationInput(): void {
-    // Se não está validando e há um resultado anterior, resetar para nova validação
-    if (!this.isValidating && this.validationResult && this.tokenToValidate.length > 0) {
-      this.resetValidation();
-      this.isValidating = true;
-    }
-
-    // Filtrar apenas letras minúsculas
-    const filtered = this.tokenToValidate.replace(/[^a-z]/g, '');
-    
-    // Se houver caracteres inválidos, remover e mostrar erro
-    if (filtered !== this.tokenToValidate) {
-      this.tokenToValidate = filtered;
-      if (this.tokenToValidate.length === 0) {
-        this.validationResult = '❌ TOKEN INVÁLIDO - Símbolo não reconhecido!';
-        this.isValidating = false;
-      }
-      return;
-    }
-
-    // Se está vazio, limpar estado
-    if (this.tokenToValidate.length === 0) {
-      if (this.isValidating) {
-        this.resetValidation();
-      }
-      return;
-    }
-
-    if (!this.isValidating) {
-      return;
-    }
-
-    // Validar toda a sequência desde o início
-    this.resetValidation();
-    this.isValidating = true;
-
-    for (const char of this.tokenToValidate) {
-      const result = this.automatoService.processSymbol(this.currentValidationState, char);
-      
-      if (result.nextState === null) {
-        // Transição inválida encontrada
-        this.tokenToValidate = this.tokenToValidate.slice(0, this.validationSteps.length);
-        this.validationResult = '❌ TOKEN INVÁLIDO - Símbolo não reconhecido!';
-        this.isValidating = false;
-        return;
-      }
-
-      // Atualizar estado
-      const fromState = this.currentValidationState;
-      this.currentValidationState = result.nextState;
-      this.validationPath.push(this.currentValidationState);
-
-      this.validationSteps.push({
-        symbol: char,
-        from: fromState,
-        to: this.currentValidationState
-      });
-    }
-  }
-
-  /**
-   * Handle do pressionamento de teclas no input de validação
-   * 
-   * Valida antes de adicionar ao campo
-   */
   onValidationKeyPress(event: KeyboardEvent): void {
-    // Enter ou Espaço finalizam a validação
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
       this.finalizeValidation();
       return;
     }
 
-    // Se há resultado anterior e digita nova letra, resetar
     if (!this.isValidating && this.validationResult) {
       const symbol = event.key.toLowerCase();
       if (/^[a-z]$/.test(symbol)) {
@@ -224,7 +152,6 @@ export class App implements OnInit {
         this.resetValidation();
         this.isValidating = true;
         
-        // Validar primeira letra
         const result = this.automatoService.processSymbol(0, symbol);
         if (result.nextState === null) {
           this.validationResult = '❌ TOKEN INVÁLIDO - Símbolo não reconhecido!';
@@ -232,7 +159,7 @@ export class App implements OnInit {
           return;
         }
         
-        // Adicionar ao campo apenas se válido
+        // validate symbol
         this.currentValidationState = result.nextState;
         this.validationPath.push(this.currentValidationState);
         this.validationSteps.push({
@@ -247,7 +174,6 @@ export class App implements OnInit {
 
     if (!this.isValidating) return;
 
-    // Processar letra normal
     const symbol = event.key.toLowerCase();
     
     // Apenas letras minúsculas
@@ -313,24 +239,17 @@ export class App implements OnInit {
     this.tokenToValidate = '';
   }
 
-  /**
-   * Retorna a cor CSS para um estado baseado no seu status
-   */
   getStateStyle(stateId: number): { [key: string]: string } {
     const isCurrentState = stateId === this.currentValidationState && this.isValidating;
     const isFinal = this.isStateFinal(stateId);
 
     if (isCurrentState) {
-      return { 'background-color': '#3498db', color: 'white' }; // Azul - estado atual
+      return { 'background-color': '#3498db', color: 'white' };
     } else if (isFinal) {
-      return { 'background-color': '#27ae60', color: 'white' }; // Verde - estado final
+      return { 'background-color': '#27ae60', color: 'white' };
     } else {
-      return { 'background-color': '#ecf0f1', color: '#333' }; // Cinza - estado normal
+      return { 'background-color': '#ecf0f1', color: '#333' };
     }
-  }
-
-  getFinalStateIcon(stateId: number): string {
-    return this.isStateFinal(stateId) ? ' ✓' : '';
   }
 
   /**

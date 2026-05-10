@@ -39,23 +39,33 @@ export class AutomatoService {
 
   buildAutomato(tokens: string[]): void {
     this.initializeAutomato();
-    
+
     if (tokens.length === 0) {
       return;
     }
 
-    let currentState = 0; 
-
     for (const token of tokens) {
+      // Começar sempre a partir do estado inicial (q0) para cada token
+      let currentState = 0;
+
+      // Token vazio: marcar o estado inicial como final
+      if (token.length === 0) {
+        this.finalStates.add(0);
+        const rootState = this.states.get(0);
+        if (rootState) {
+          rootState.isFinal = true;
+        }
+        continue;
+      }
+
       for (const symbol of token) {
-
         this.alphabet.add(symbol);
-        
-        const state = this.states.get(currentState);
 
+        const state = this.states.get(currentState);
         if (!state) {
-          continue
-        };
+          // segurança: se não houver estado esperado, pare este token
+          break;
+        }
 
         if (state.transitions.has(symbol)) {
           currentState = state.transitions.get(symbol)!;
@@ -67,12 +77,10 @@ export class AutomatoService {
       }
 
       // Marcar o estado final como aceitação para este token
-      if (currentState !== 0) {
-        this.finalStates.add(currentState);
-        const finalState = this.states.get(currentState);
-        if (finalState) {
-          finalState.isFinal = true;
-        }
+      this.finalStates.add(currentState);
+      const finalState = this.states.get(currentState);
+      if (finalState) {
+        finalState.isFinal = true;
       }
     }
   }
