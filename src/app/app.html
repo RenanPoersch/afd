@@ -1,5 +1,4 @@
 <div class="app-container">
-  <!-- CABEÇALHO -->
   <header class="app-header">
     <div class="header-content">
       <h1>Analisador Léxico</h1>
@@ -7,14 +6,12 @@
   </header>
 
   <main class="app-main">
-    <!-- ========== SEÇÃO 1: CADASTRO DE TOKENS ========== -->
     <section class="card section-tokens">
       <div class="card-header">
         <h2>Cadastro de Tokens</h2>
       </div>
 
       <div class="card-body">
-        <!-- Input para novos tokens -->
         <div class="input-group">
           <input
             type="text"
@@ -29,12 +26,10 @@
           </button>
         </div>
 
-        <!-- Mensagem de erro -->
-        <div *ngIf="duplicateTokenError" class="error-message">
-         {{ duplicateTokenError }}
+        <div *ngIf="tokenError" class="error-message">
+         {{ tokenError }}
         </div>
 
-        <!-- Lista de tokens cadastrados -->
         <div *ngIf="tokens.length > 0" class="tokens-list">
           <h3>Tokens Cadastrados:</h3>
           <div class="tokens-grid">
@@ -50,7 +45,6 @@
             </div>
           </div>
 
-          <!-- Botões de ação -->
           <div class="button-group">
             <button (click)="buildAutomato()" class="btn btn-success">
               Construir Autômato
@@ -61,7 +55,6 @@
           </div>
         </div>
 
-        <!-- Placeholder quando não há tokens -->
         <div *ngIf="tokens.length === 0" class="empty-state">
           <p>Nenhum token cadastrado. Comece adicionando um token acima!</p>
         </div>
@@ -141,7 +134,7 @@
           <div class="validation-input-group">
             <input
               type="text"
-              [(ngModel)]="tokenToValidate"
+              [value]="tokenToValidate"
               (keydown)="onValidationKeyPress($event)"
               placeholder="Digite..."
               class="input-field input-validation"

@@ -1,16 +1,6 @@
 import { Injectable } from '@angular/core';
 import { State, ValidationResult, TokenValidationStep } from '../models/state';
 
-/**
- * SERVIÇO CORE DO ANALISADOR LÉXICO COM AFD
- * 
- * Este serviço encapsula toda a lógica do Autômato Finito Determinístico.
- * Responsável por:
- * - Construir o AFD a partir de tokens cadastrados
- * - Gerenciar estados e transições
- * - Validar novos tokens símbolo por símbolo
- * - Manter histórico de validações
- */
 @Injectable({
   providedIn: 'root'
 })
@@ -20,16 +10,12 @@ export class AutomatoService {
   private finalStates: Set<number> = new Set();
   private alphabet: Set<string> = new Set();
   
-  // Histórico de validações para fins didáticos
   private validationHistory: TokenValidationStep[] = [];
 
   constructor() {
     this.initializeAutomato();
   }
 
-  /**
-   * Inicializa o autômato com o estado inicial (q0)
-   */
   private initializeAutomato(): void {
     this.states.clear();
     this.finalStates.clear();
@@ -37,15 +23,9 @@ export class AutomatoService {
     this.stateCounter = 0;
     this.validationHistory = [];
     
-    // Criar estado inicial q0
     this.createState(true);
   }
 
-  /**
-   * Cria um novo estado no autômato
-   * @param isInitial Se é o primeiro estado (q0)
-   * @returns ID do novo estado
-   */
   private createState(isInitial: boolean = false): number {
     const id = this.stateCounter++;
     const newState: State = {
@@ -57,18 +37,6 @@ export class AutomatoService {
     return id;
   }
 
-  /**
-   * CONSTRÓI AUTOMATICAMENTE O AFD A PARTIR DOS TOKENS
-   * 
-   * Algoritmo:
-   * 1. Para cada token cadastrado:
-   *    - Percorrer símbolo por símbolo
-   *    - Seguir a transição existente se houver
-   *    - Criar novo estado se não houver transição
-   *    - Marcar último estado como final
-   * 
-   * Isso cria uma estrutura de árvore/trie otimizada
-   */
   buildAutomato(tokens: string[]): void {
     this.initializeAutomato();
     
@@ -76,26 +44,22 @@ export class AutomatoService {
       return;
     }
 
-    // Estado inicial q0 (já existe)
-    let currentState = 0;
+    let currentState = 0; 
 
-    // Processar cada token
     for (const token of tokens) {
-      currentState = 0; // Sempre começar do q0
-      
-      // Processar cada símbolo do token
       for (const symbol of token) {
-        this.alphabet.add(symbol); // Registrar símbolo no alfabeto
+
+        this.alphabet.add(symbol);
         
         const state = this.states.get(currentState);
-        if (!state) continue;
 
-        // Verificar se já existe transição para este símbolo
+        if (!state) {
+          continue
+        };
+
         if (state.transitions.has(symbol)) {
-          // Seguir transição existente
           currentState = state.transitions.get(symbol)!;
         } else {
-          // Criar novo estado e transição
           const nextState = this.createState();
           state.transitions.set(symbol, nextState);
           currentState = nextState;

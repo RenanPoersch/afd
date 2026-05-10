@@ -4,11 +4,6 @@ import { FormsModule } from '@angular/forms';
 import { AutomatoService } from './services/automato.service';
 import { State } from './models/state';
 
-/**
- * COMPONENTE PRINCIPAL - ANALISADOR LÉXICO COM AFD
- * 
- * Responsável pela interface do usuário e orquestração do fluxo
- */
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -16,6 +11,7 @@ import { State } from './models/state';
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
+
 export class App implements OnInit {
   // ========== GERENCIAMENTO DE TOKENS ==========
   newToken: string = '';
@@ -31,6 +27,12 @@ export class App implements OnInit {
     alphabet: string[];
     transitions: Map<string, Map<string, string>>;
   } | null = null;
+  grammarRules: Array<{
+    left: string;
+    productions: string[];
+    isStart: boolean;
+    isFinal: boolean;
+  }> = [];
 
   // ========== VALIDAÇÃO DE TOKENS ==========
   tokenToValidate: string = '';
@@ -46,7 +48,7 @@ export class App implements OnInit {
 
   // ========== UI STATE ==========
   showAutomato: boolean = false;
-  duplicateTokenError: string = '';
+  tokenError: string = '';
   stats: {
     totalStates: number;
     totalFinalStates: number;
@@ -56,51 +58,33 @@ export class App implements OnInit {
 
   constructor(private automatoService: AutomatoService) {}
 
-  ngOnInit(): void {
-    // Inicializar com alguns exemplos (opcional)
-  }
+  ngOnInit(): void {}
 
-  // ========== MÉTODOS DE CADASTRO DE TOKENS ==========
-
-  /**
-   * Adiciona um novo token à lista
-   * 
-   * Validações:
-   * - Apenas letras minúsculas (a-z)
-   * - Sem duplicatas
-   * - Não vazio
-   */
   addToken(): void {
-    this.duplicateTokenError = '';
+    this.tokenError = '';
 
     if (!this.newToken.trim()) {
-      this.duplicateTokenError = 'Token não pode estar vazio!';
+      this.tokenError = 'Token não pode estar vazio!';
       return;
     }
 
-    // Filtrar apenas letras minúsculas
     const filteredToken = this.newToken.toLowerCase().replace(/[^a-z]/g, '');
 
     if (!filteredToken) {
-      this.duplicateTokenError = 'Token deve conter pelo menos uma letra minúscula (a-z)!';
+      this.tokenError = 'Token deve conter pelo menos uma letra minúscula (a-z)!';
       return;
     }
 
-    // Verificar duplicata
     if (this.tokens.includes(filteredToken)) {
-      this.duplicateTokenError = `Token '${filteredToken}' já foi cadastrado!`;
+      this.tokenError = `Token '${filteredToken}' já foi cadastrado!`;
       return;
     }
 
-    // Adicionar token
     this.tokens.push(filteredToken);
     this.newToken = '';
     this.showAutomato = false;
   }
 
-  /**
-   * Handle do pressionamento de teclas no input de tokens
-   */
   onTokenKeyPress(event: KeyboardEvent): void {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
@@ -108,78 +92,84 @@ export class App implements OnInit {
     }
   }
 
-  /**
-   * Remove um token da lista
-   */
   removeToken(index: number): void {
     this.tokens.splice(index, 1);
     this.showAutomato = false;
-    this.duplicateTokenError = '';
+    this.tokenError = '';
   }
 
-  /**
-   * Limpa todos os tokens e reseta o autômato
-   */
   clearAllTokens(): void {
     this.tokens = [];
     this.validTokensRecognized = [];
     this.showAutomato = false;
-    this.duplicateTokenError = '';
+    this.tokenError = '';
     this.states.clear();
     this.finalStates.clear();
     this.alphabet = [];
     this.stats = null;
+    this.grammarRules = [];
   }
 
-  // ========== MÉTODOS DE CONSTRUÇÃO DO AUTÔMATO ==========
-
-  /**
-   * CONSTRÓI O AUTÔMATO AUTOMATICAMENTE
-   * 
-   * Dispara a construção do AFD no serviço e atualiza a interface
-   */
   buildAutomato(): void {
-    if (this.tokens.length === 0) {
-      alert('Adicione pelo menos um token antes de construir o autômato!');
-      return;
-    }
 
-    // Construir AFD
     this.automatoService.buildAutomato(this.tokens);
 
-    // Recuperar dados do autômato
     this.states = this.automatoService.getStates();
     this.finalStates = this.automatoService.getFinalStates();
     this.alphabet = this.automatoService.getAlphabet();
     this.transitionTable = this.automatoService.getTransitionTable();
     this.stats = this.automatoService.getAutomatoStats();
+    this.grammarRules = this.buildGrammarRules();
 
     this.showAutomato = true;
     this.resetValidation();
     this.isValidating = true;
   }
 
-  /**
-   * Retorna a label do estado (q0, q1, q2, etc)
-   */
-  getStateLabel(stateId: number): string {
-    return `q${stateId}`;
+  buildGrammarRules(): Array<{
+    left: string;
+    productions: string[];
+    isStart: boolean;
+    isFinal: boolean;
+  }> {
+    const rules: Array<{
+      left: string;
+      productions: string[];
+      isStart: boolean;
+      isFinal: boolean;
+    }> = [];
+
+    const stateIds = Array.from(this.states.keys()).sort((a, b) => a - b);
+
+    for (const stateId of stateIds) {
+      const state = this.states.get(stateId);
+      if (!state) continue;
+
+      const productions: string[] = [];
+
+      for (const [symbol, nextStateId] of state.transitions.entries()) {
+        productions.push(`${symbol} q${nextStateId}`);
+      }
+
+      if (state.isFinal) {
+        productions.push('ε');
+      }
+
+      rules.push({
+        left: `q${stateId}`,
+        productions,
+        isStart: stateId === 0,
+        isFinal: state.isFinal
+      });
+    }
+
+    return rules;
   }
 
-  /**
-   * Verifica se um estado é final
-   */
   isStateFinal(stateId: number): boolean {
     return this.finalStates.has(stateId);
   }
 
-  // ========== MÉTODOS DE VALIDAÇÃO DE TOKENS ==========
-
-
-
-  /**
-   * Reseta o estado de validação
-   */
   resetValidation(): void {
     this.currentValidationState = 0;
     this.validationPath = [0];
@@ -191,69 +181,75 @@ export class App implements OnInit {
 
   /**
    * PROCESSA UM SÍMBOLO DURANTE A VALIDAÇÃO
-   * 
-   * Este é o coração do funcionamento do AFD:
-   * 1. Ler o símbolo
-   * 2. Buscar a transição no estado atual
-   * 3. Atualizar o estado
-   * 4. Se não houver transição, REJEITAR
+  /**
+   * Valida caracteres inseridos no input em tempo real
    */
-  private processValidationSymbol(symbol: string): boolean {
-    const result = this.automatoService.processSymbol(
-      this.currentValidationState,
-      symbol
-    );
-
-    if (result.nextState === null) {
-      return false; // Sem transição válida
+  onValidationInput(): void {
+    // Se não está validando e há um resultado anterior, resetar para nova validação
+    if (!this.isValidating && this.validationResult && this.tokenToValidate.length > 0) {
+      this.resetValidation();
+      this.isValidating = true;
     }
 
-    // Atualizar estado e registrar o passo
-    const fromState = this.currentValidationState;
-    this.currentValidationState = result.nextState;
-    this.validationPath.push(this.currentValidationState);
+    // Filtrar apenas letras minúsculas
+    const filtered = this.tokenToValidate.replace(/[^a-z]/g, '');
+    
+    // Se houver caracteres inválidos, remover e mostrar erro
+    if (filtered !== this.tokenToValidate) {
+      this.tokenToValidate = filtered;
+      if (this.tokenToValidate.length === 0) {
+        this.validationResult = '❌ TOKEN INVÁLIDO - Símbolo não reconhecido!';
+        this.isValidating = false;
+      }
+      return;
+    }
 
-    this.validationSteps.push({
-      symbol,
-      from: fromState,
-      to: this.currentValidationState
-    });
+    // Se está vazio, limpar estado
+    if (this.tokenToValidate.length === 0) {
+      if (this.isValidating) {
+        this.resetValidation();
+      }
+      return;
+    }
 
-    return true;
+    if (!this.isValidating) {
+      return;
+    }
+
+    // Validar toda a sequência desde o início
+    this.resetValidation();
+    this.isValidating = true;
+
+    for (const char of this.tokenToValidate) {
+      const result = this.automatoService.processSymbol(this.currentValidationState, char);
+      
+      if (result.nextState === null) {
+        // Transição inválida encontrada
+        this.tokenToValidate = this.tokenToValidate.slice(0, this.validationSteps.length);
+        this.validationResult = '❌ TOKEN INVÁLIDO - Símbolo não reconhecido!';
+        this.isValidating = false;
+        return;
+      }
+
+      // Atualizar estado
+      const fromState = this.currentValidationState;
+      this.currentValidationState = result.nextState;
+      this.validationPath.push(this.currentValidationState);
+
+      this.validationSteps.push({
+        symbol: char,
+        from: fromState,
+        to: this.currentValidationState
+      });
+    }
   }
 
   /**
    * Handle do pressionamento de teclas no input de validação
    * 
-   * Enter ou Espaço finalizam a validação
-   * Se houver resultado e o usuário digita novamente, inicia nova validação automaticamente
+   * Valida antes de adicionar ao campo
    */
   onValidationKeyPress(event: KeyboardEvent): void {
-    // Se há um resultado anterior e o usuário começa a digitar, resetar automaticamente
-    if (!this.isValidating && this.validationResult) {
-      const symbol = event.key.toLowerCase();
-      
-      // Apenas letras minúsculas disparam novo reset
-      if (/^[a-z]$/.test(symbol)) {
-        event.preventDefault();
-        this.resetValidation();
-        this.isValidating = true;
-        // Processar o primeiro caractere da nova validação
-        this.processValidationSymbol(symbol);
-        this.tokenToValidate += symbol;
-        return;
-      }
-      if (event.key !== 'Enter' && event.key !== ' ') {
-        event.preventDefault();
-        this.validationResult = '❌ TOKEN INVÁLIDO - Símbolo não reconhecido!';
-        this.tokenToValidate = '';
-        return;
-      }
-      return;
-    }
-
-    if (!this.isValidating) return;
-
     // Enter ou Espaço finalizam a validação
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
@@ -261,34 +257,69 @@ export class App implements OnInit {
       return;
     }
 
-    // Qualquer outro caractere é processado
-    const symbol = event.key.toLowerCase();
-    
-    // Aceitar apenas letras minúsculas
-    if (!/^[a-z]$/.test(symbol)) {
-      event.preventDefault();
-      if (event.key !== 'Enter' && event.key !== ' ') {
-        this.validationResult = '❌ TOKEN INVÁLIDO - Símbolo não reconhecido!';
-        this.tokenToValidate = '';
-        this.isValidating = false;
+    // Se há resultado anterior e digita nova letra, resetar
+    if (!this.isValidating && this.validationResult) {
+      const symbol = event.key.toLowerCase();
+      if (/^[a-z]$/.test(symbol)) {
+        event.preventDefault();
+        this.resetValidation();
+        this.isValidating = true;
+        
+        // Validar primeira letra
+        const result = this.automatoService.processSymbol(0, symbol);
+        if (result.nextState === null) {
+          this.validationResult = '❌ TOKEN INVÁLIDO - Símbolo não reconhecido!';
+          this.tokenToValidate = '';
+          return;
+        }
+        
+        // Adicionar ao campo apenas se válido
+        this.currentValidationState = result.nextState;
+        this.validationPath.push(this.currentValidationState);
+        this.validationSteps.push({
+          symbol,
+          from: 0,
+          to: this.currentValidationState
+        });
+        this.tokenToValidate += symbol;
       }
       return;
     }
 
-    // Processar o símbolo no autômato
-    const isValid = this.processValidationSymbol(symbol);
+    if (!this.isValidating) return;
 
-    if (!isValid) {
-      // Rejeitar token: nenhuma transição válida
+    // Processar letra normal
+    const symbol = event.key.toLowerCase();
+    
+    // Apenas letras minúsculas
+    if (!/^[a-z]$/.test(symbol)) {
+      event.preventDefault();
+      return;
+    }
+
+    event.preventDefault();
+
+    // Validar transição
+    const result = this.automatoService.processSymbol(this.currentValidationState, symbol);
+    
+    if (result.nextState === null) {
+      // Transição inválida
       this.validationResult = '❌ TOKEN INVÁLIDO - Símbolo não reconhecido!';
       this.tokenToValidate = '';
       this.isValidating = false;
       return;
     }
 
-    // Atualizar o input visualmente
+    // Adicionar ao campo apenas se transição é válida
+    const fromState = this.currentValidationState;
+    this.currentValidationState = result.nextState;
+    this.validationPath.push(this.currentValidationState);
+    this.validationSteps.push({
+      symbol,
+      from: fromState,
+      to: this.currentValidationState
+    });
     this.tokenToValidate += symbol;
-    event.preventDefault();
   }
 
   /**
@@ -339,9 +370,6 @@ export class App implements OnInit {
     }
   }
 
-  /**
-   * Retorna ícone para estado final
-   */
   getFinalStateIcon(stateId: number): string {
     return this.isStateFinal(stateId) ? ' ✓' : '';
   }
