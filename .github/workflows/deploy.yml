@@ -31,6 +31,17 @@ jobs:
       - name: Build Angular app to docs/
         run: npm run build
 
+      - name: Flatten docs output for GitHub Pages
+        run: |
+          rm -rf /tmp/afd-pages
+          mkdir -p /tmp/afd-pages
+          cp -R docs/browser/. /tmp/afd-pages/
+          rm -rf docs/browser
+          rm -rf docs/*
+          cp -R /tmp/afd-pages/. docs/
+          touch docs/.nojekyll
+          rm -rf /tmp/afd-pages
+
       - name: Commit and push to main
         run: |
           git config user.name "GitHub Actions"
