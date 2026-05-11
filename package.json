@@ -7,7 +7,7 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "deploy": "ng build && gh-pages -d dist/afd/browser"
+    "deploy": "ng build && main -d dist/afd/browser"
   },
   "prettier": {
     "overrides": [
