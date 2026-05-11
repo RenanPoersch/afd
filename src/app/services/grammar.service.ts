@@ -45,74 +45,64 @@ export class GrammarService {
 
     const assignedNames = new Map<GrammarNode, string>();
     const queue: GrammarNode[] = [root];
-    let nextChildIndex = 0;
+    let nextNameIndex = 0;
 
-    const childLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    const getNextChildNonTerminal = (): string => {
-      const index = nextChildIndex;
-      nextChildIndex += 1;
+    const getNextNonTerminal = (): string => {
+    if (nextNameIndex === 0) {
+        nextNameIndex += 1;
+        return 'S';
+    }
 
-      if (index < childLetters.length) {
-        const letter = childLetters[index];
-        return letter === 'S' ? `A${index + 1}` : letter;
-      }
+    const alphabet = 'ABCDEFGHIJKLMNOPQRTUVWXYZ';
+    const index = nextNameIndex - 1;
+    nextNameIndex += 1;
 
-      return `A${index - childLetters.length + 1}`;
+    if (index < alphabet.length) {
+        return alphabet[index];
+    }
+
+    return `A${index - alphabet.length + 1}`;
     };
 
-    assignedNames.set(root, 'S');
+    assignedNames.set(root, getNextNonTerminal());
 
     while (queue.length > 0) {
       const node = queue.shift()!;
 
       for (const child of node.children.values()) {
         if (!assignedNames.has(child)) {
-          assignedNames.set(child, getNextChildNonTerminal());
+          assignedNames.set(child, getNextNonTerminal());
           queue.push(child);
         }
       }
     }
 
-    // Consolidate rules by left-hand side to avoid duplicates
-    const rulesMap = new Map<string, Set<string>>();
-    const finalMap = new Map<string, boolean>();
+    const rules: GrammarRule[] = [];
+    const allNodes = [...assignedNames.keys()].sort((a, b) => {
+    const leftA = assignedNames.get(a) ?? '';
+    const leftB = assignedNames.get(b) ?? '';
 
-    for (const [node, name] of assignedNames.entries()) {
-      finalMap.set(name, node.isFinal || finalMap.get(name) === true);
+    if (leftA === 'S') return -1;
+    if (leftB === 'S') return 1;
 
-      for (const [symbol, child] of node.children.entries()) {
-        const childName = assignedNames.get(child);
-        if (!childName) continue;
-
-        const prod = `${symbol}${childName}`;
-        if (!rulesMap.has(name)) rulesMap.set(name, new Set());
-        rulesMap.get(name)!.add(prod);
-      }
-    }
-
-    // Add epsilon only once per rule
-    for (const [name, isFinal] of finalMap.entries()) {
-      if (isFinal) {
-        if (!rulesMap.has(name)) rulesMap.set(name, new Set());
-        rulesMap.get(name)!.add('ε');
-      }
-    }
-
-    // Build final rules sorted with S first
-    const names = Array.from(rulesMap.keys()).sort((a, b) => {
-      if (a === 'S') return -1;
-      if (b === 'S') return 1;
-      return a.localeCompare(b);
+    return leftA.localeCompare(leftB);
     });
 
-    const rules: GrammarRule[] = [];
-    for (const left of names) {
-      const productions = Array.from(rulesMap.get(left) ?? []).sort();
+    for (const node of allNodes) {
+      const left = assignedNames.get(node)!;
+      const productions = Array.from(node.children.entries()).map(([symbol, child]) => {
+        return `${symbol}${assignedNames.get(child)}`;
+      });
+
+      if (node.isFinal) {
+        productions.push('ε');
+      }
+
       rules.push({
         left,
         productions,
         isStart: left === 'S',
-        isFinal: finalMap.get(left) ?? false
+        isFinal: node.isFinal
       });
     }
 
