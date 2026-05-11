@@ -20,7 +20,7 @@
         "build": {
           "builder": "@angular/build:application",
           "options": {
-            "outputPath": "dist/afd",
+            "outputPath": "docs",
             "baseHref": "/afd/",
             "browser": "src/main.ts",
             "polyfills": [
