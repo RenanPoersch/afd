@@ -47,7 +47,7 @@ export class GrammarService {
     const queue: GrammarNode[] = [root];
 
     let nextNameIndex = 0;
-    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const letters = 'ABCDEFGHIJKLMNOPQRTUVWXYZ';
     const getNextNonTerminal = (): string => {
       if (nextNameIndex === 0) {
         nextNameIndex += 1;
