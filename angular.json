@@ -20,6 +20,8 @@
         "build": {
           "builder": "@angular/build:application",
           "options": {
+            "outputPath": "dist/afd",
+            "baseHref": "/afd/",
             "browser": "src/main.ts",
             "polyfills": [
               "zone.js"
