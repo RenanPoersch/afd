@@ -207,27 +207,17 @@ export class App implements OnInit {
     this.tokenToValidate += symbol;
   }
 
-  /**
-   * FINALIZA A VALIDAÇÃO
-   * 
-   * Verifica:
-   * 1. Se terminou em um estado final
-   * 2. Se o token é válido
-   * 3. Registra tokens válidos reconhecidos
-   */
   finalizeValidation(): void {
     if (this.tokenToValidate.trim().length === 0) {
       this.validationResult = '';
       return;
     }
 
-    // Verificar se está em um estado final
     const isFinalState = this.finalStates.has(this.currentValidationState);
 
     if (isFinalState) {
       this.validationResult = `✅ TOKEN VÁLIDO: "${this.tokenToValidate}"`;
-      
-      // Registrar token válido reconhecido
+
       if (!this.validTokensRecognized.includes(this.tokenToValidate)) {
         this.validTokensRecognized.push(this.tokenToValidate);
       }
@@ -252,9 +242,6 @@ export class App implements OnInit {
     }
   }
 
-  /**
-   * Obtém o valor da transição da tabela
-   */
   getTransitionValue(stateId: number, symbol: string): string {
     if (!this.transitionTable) return '-';
     const stateLabel = `q${stateId}`;

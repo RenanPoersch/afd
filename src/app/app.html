@@ -61,16 +61,13 @@
       </div>
     </section>
 
-    <!-- ========== SEÇÕES 2 E 3: AUTÔMATO E VALIDAÇÃO LADO A LADO ========== -->
     <div *ngIf="showAutomato" class="sections-wrapper">
-      <!-- SEÇÃO 2: VISUALIZAÇÃO DO AUTÔMATO -->
       <section class="card section-automato">
         <div class="card-header">
           <h2>Autômato Finito Determinístico</h2>
         </div>
 
         <div class="card-body">
-          <!-- Estatísticas -->
           <div *ngIf="stats" class="stats-grid">
             <div class="stat-card">
               <span class="stat-value">{{ stats.totalStates }}</span>
@@ -90,7 +87,6 @@
             </div>
           </div>
           
-          <!-- Tabela de Transição -->
           <div *ngIf="transitionTable" class="transition-table-container">
             <h3>Tabela de Transição δ(q, σ):</h3>
             <div class="table-wrapper">
@@ -123,14 +119,12 @@
         </div>
       </section>
 
-      <!-- SEÇÃO 3: VALIDAÇÃO DE TOKENS -->
       <section class="card section-validation">
         <div class="card-header">
           <h2>Validação</h2>
         </div>
 
         <div class="card-body">
-          <!-- Input de validação -->
           <div class="validation-input-group">
             <input
               type="text"
@@ -143,12 +137,10 @@
             <span class="input-help">Estado atual: <strong>q{{ currentValidationState }}</strong></span>
           </div>
 
-        <!-- Resultado da validação -->
         <div *ngIf="validationResult" class="validation-result" [ngClass]="{ valid: validationResult.includes('✅'), invalid: validationResult.includes('❌') }">
           {{ validationResult }}
         </div>
 
-        <!-- Histórico de transições -->
         <div *ngIf="validationSteps.length > 0" class="validation-steps">
           <h3>Transições Realizadas:</h3>
           <div class="steps-timeline">
@@ -173,7 +165,6 @@
     </section>
     </div>
 
-    <!-- ========== SEÇÃO 4: GRAMÁTICA GERADA ========== -->
     <section *ngIf="grammarRules.length > 0 && showAutomato" class="card section-grammar">
       <div class="card-header">
         <h2>Gramática Regular Gerada</h2>
@@ -205,7 +196,6 @@
       </div>
     </section>
 
-    <!-- ========== SEÇÃO 4: TOKENS VÁLIDOS RECONHECIDOS ========== -->
     <section *ngIf="validTokensRecognized.length > 0" class="card section-recognized">
       <div class="card-header">
         <h2>Tokens Válidos Reconhecidos</h2>

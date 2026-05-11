@@ -11,17 +11,6 @@ export interface State {
 }
 
 /**
- * Interface para representar uma transição no AFD
- * 
- * Uma transição é um arco que conecta dois estados através de um símbolo
- */
-export interface Transition {
-  fromState: number;    // ID do estado de origem
-  toState: number;      // ID do estado destino
-  symbol: string;       // Símbolo que causa essa transição
-}
-
-/**
  * Interface para representar o resultado da validação
  */
 export interface ValidationResult {
@@ -37,5 +26,4 @@ export interface TokenValidationStep {
   symbol: string;       // Símbolo processado
   fromState: number;    // Estado anterior
   toState: number;      // Estado novo
-  timestamp: number;    // Quando ocorreu
 }

@@ -78,7 +78,6 @@ Encapsula toda a lógica do AFD:
 
 ### Models
 - **State** - Representa um estado (id, final, transições)
-- **Transition** - Representa uma transição
 - **ValidationResult** - Resultado da validação
 - **TokenValidationStep** - Passo na validação
 

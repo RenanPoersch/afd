@@ -45,10 +45,9 @@ export class AutomatoService {
     }
 
     for (const token of tokens) {
-      // Começar sempre a partir do estado inicial (q0) para cada token
+
       let currentState = 0;
 
-      // Token vazio: marcar o estado inicial como final
       if (token.length === 0) {
         this.finalStates.add(0);
         const rootState = this.states.get(0);
@@ -63,7 +62,6 @@ export class AutomatoService {
 
         const state = this.states.get(currentState);
         if (!state) {
-          // segurança: se não houver estado esperado, pare este token
           break;
         }
 
@@ -76,7 +74,6 @@ export class AutomatoService {
         }
       }
 
-      // Marcar o estado final como aceitação para este token
       this.finalStates.add(currentState);
       const finalState = this.states.get(currentState);
       if (finalState) {
@@ -85,52 +82,6 @@ export class AutomatoService {
     }
   }
 
-  /**
-   * VALIDA UM TOKEN SÍMBOLO POR SÍMBOLO
-   * 
-   * Implementa o funcionamento do AFD:
-   * 1. Iniciar no estado q0
-   * 2. Para cada símbolo:
-   *    - Buscar a transição δ(estado_atual, símbolo)
-   *    - Atualizar estado_atual
-   *    - Se não houver transição, REJEITAR
-   * 3. Ao final, verificar se está em estado final
-   * 
-   * @param symbol Símbolo a processar
-   * @returns Novo estado ou null se inválido
-   */
-  processSymbol(currentState: number, symbol: string): { nextState: number | null; isValid: boolean } {
-    const state = this.states.get(currentState);
-    
-    if (!state) {
-      return { nextState: null, isValid: false };
-    }
-
-    // Buscar transição: δ(currentState, symbol)
-    const nextState = state.transitions.get(symbol) ?? null;
-    
-    if (nextState === null) {
-      // Não há transição para este símbolo
-      return { nextState: null, isValid: false };
-    }
-
-    // Registrar a transição realizada
-    this.validationHistory.push({
-      symbol,
-      fromState: currentState,
-      toState: nextState,
-      timestamp: Date.now()
-    });
-
-    return { nextState, isValid: true };
-  }
-
-  /**
-   * VALIDA UM TOKEN COMPLETO
-   * 
-   * @param token Token a validar
-   * @returns Resultado da validação
-   */
   validateToken(token: string): ValidationResult {
     this.validationHistory = [];
     let currentState = 0;
@@ -149,7 +100,6 @@ export class AutomatoService {
       path.push(currentState);
     }
 
-    // Verificar se terminou em um estado final
     const isFinalState = this.finalStates.has(currentState);
     isValid = isValid && isFinalState;
 
@@ -160,31 +110,40 @@ export class AutomatoService {
     };
   }
 
-  /**
-   * Retorna todos os estados do autômato
-   */
+  processSymbol(currentState: number, symbol: string): { nextState: number | null; isValid: boolean } {
+    const state = this.states.get(currentState);
+    
+    if (!state) {
+      return { nextState: null, isValid: false };
+    }
+
+    const nextState = state.transitions.get(symbol) ?? null;
+    
+    if (nextState === null) {
+      return { nextState: null, isValid: false };
+    }
+
+    this.validationHistory.push({
+      symbol,
+      fromState: currentState,
+      toState: nextState,
+    });
+
+    return { nextState, isValid: true };
+  }
+
   getStates(): Map<number, State> {
     return new Map(this.states);
   }
 
-  /**
-   * Retorna os IDs dos estados finais
-   */
   getFinalStates(): Set<number> {
     return new Set(this.finalStates);
   }
 
-  /**
-   * Retorna o alfabeto detectado
-   */
   getAlphabet(): string[] {
     return Array.from(this.alphabet).sort();
   }
 
-  /**
-   * Gera a tabela de transição para renderização
-   * @returns Objeto com linhas (estados) e colunas (símbolos)
-   */
   getTransitionTable(): {
     states: number[];
     alphabet: string[];
@@ -215,23 +174,14 @@ export class AutomatoService {
     };
   }
 
-  /**
-   * Retorna o histórico de validações
-   */
   getValidationHistory(): TokenValidationStep[] {
     return [...this.validationHistory];
   }
 
-  /**
-   * Reseta o histórico de validações
-   */
   clearValidationHistory(): void {
     this.validationHistory = [];
   }
 
-  /**
-   * Retorna informações estatísticas sobre o autômato
-   */
   getAutomatoStats(): {
     totalStates: number;
     totalFinalStates: number;
