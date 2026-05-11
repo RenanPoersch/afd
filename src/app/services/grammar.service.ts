@@ -45,26 +45,27 @@ export class GrammarService {
 
     const assignedNames = new Map<GrammarNode, string>();
     const queue: GrammarNode[] = [root];
-    let nextNameIndex = 0;
 
+    let nextNameIndex = 0;
+    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     const getNextNonTerminal = (): string => {
       if (nextNameIndex === 0) {
         nextNameIndex += 1;
         return 'S';
       }
 
-      const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
       const index = nextNameIndex - 1;
       nextNameIndex += 1;
 
-      if (index < alphabet.length) {
-        return alphabet[index];
+      if (index < letters.length) {
+        return letters[index];
       }
 
-      return `A${index - alphabet.length + 1}`;
+      return `A${index - letters.length + 1}`;
     };
 
-    assignedNames.set(root, getNextNonTerminal());
+    assignedNames.set(root, 'S');
+    nextNameIndex = 1;
 
     while (queue.length > 0) {
       const node = queue.shift()!;
@@ -77,34 +78,49 @@ export class GrammarService {
       }
     }
 
-    const rules: GrammarRule[] = [];
-    const allNodes = [...assignedNames.keys()];
+    const rulesMap = new Map<string, Set<string>>();
+    const finalMap = new Map<string, boolean>();
 
-    allNodes.sort((a, b) => {
-      const leftA = assignedNames.get(a) ?? '';
-      const leftB = assignedNames.get(b) ?? '';
+    for (const [node, name] of assignedNames.entries()) {
+      finalMap.set(name, node.isFinal || finalMap.get(name) === true);
 
-      if (leftA === 'S') return -1;
-      if (leftB === 'S') return 1;
+      for (const [symbol, child] of node.children.entries()) {
+        let childName = assignedNames.get(child);
+        if (!childName) {
+          childName = getNextNonTerminal();
+          assignedNames.set(child, childName);
+        }
 
-      return leftA.localeCompare(leftB);
+        const prod = `${symbol}${childName}`;
+        if (!rulesMap.has(name)) rulesMap.set(name, new Set());
+        rulesMap.get(name)!.add(prod);
+      }
+    }
+
+    for (const [node, name] of assignedNames.entries()) {
+      if (node.isFinal) {
+        if (!rulesMap.has(name)) rulesMap.set(name, new Set());
+        rulesMap.get(name)!.add('ε');
+      }
+    }
+
+    const names = Array.from(rulesMap.keys());
+    if (!names.includes('S')) names.unshift('S');
+
+    names.sort((a, b) => {
+      if (a === 'S') return -1;
+      if (b === 'S') return 1;
+      return a.localeCompare(b);
     });
 
-    for (const node of allNodes) {
-      const left = assignedNames.get(node)!;
-      const productions = Array.from(node.children.entries()).map(([symbol, child]) => {
-        return `${symbol}${assignedNames.get(child)}`;
-      });
-
-      if (node.isFinal) {
-        productions.push('ε');
-      }
-
+    const rules: GrammarRule[] = [];
+    for (const left of names) {
+      const prods = Array.from(rulesMap.get(left) ?? []).sort();
       rules.push({
         left,
-        productions,
+        productions: prods,
         isStart: left === 'S',
-        isFinal: node.isFinal
+        isFinal: finalMap.get(left) ?? false
       });
     }
 
