@@ -46,33 +46,28 @@ export class GrammarService {
     const assignedNames = new Map<GrammarNode, string>();
     const queue: GrammarNode[] = [root];
 
-    let nextNameIndex = 0;
-    const letters = 'ABCDEFGHIJKLMNOPQRTUVWXYZ';
-    const getNextNonTerminal = (): string => {
-      if (nextNameIndex === 0) {
-        nextNameIndex += 1;
-        return 'S';
+    let nextChildIndex = 0;
+    const childLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const getNextChildNonTerminal = (): string => {
+      const index = nextChildIndex;
+      nextChildIndex += 1;
+
+      if (index < childLetters.length) {
+        const letter = childLetters[index];
+        return letter === 'S' ? `A${index + 1}` : letter;
       }
 
-      const index = nextNameIndex - 1;
-      nextNameIndex += 1;
-
-      if (index < letters.length) {
-        return letters[index];
-      }
-
-      return `A${index - letters.length + 1}`;
+      return `A${index - childLetters.length + 1}`;
     };
 
     assignedNames.set(root, 'S');
-    nextNameIndex = 1;
 
     while (queue.length > 0) {
       const node = queue.shift()!;
 
       for (const child of node.children.values()) {
         if (!assignedNames.has(child)) {
-          assignedNames.set(child, getNextNonTerminal());
+          assignedNames.set(child, getNextChildNonTerminal());
           queue.push(child);
         }
       }
@@ -87,7 +82,7 @@ export class GrammarService {
       for (const [symbol, child] of node.children.entries()) {
         let childName = assignedNames.get(child);
         if (!childName) {
-          childName = getNextNonTerminal();
+          childName = getNextChildNonTerminal();
           assignedNames.set(child, childName);
         }
 
@@ -113,17 +108,25 @@ export class GrammarService {
       return a.localeCompare(b);
     });
 
-    const rules: GrammarRule[] = [];
+    const mergedRules = new Map<string, GrammarRule>();
     for (const left of names) {
-      const prods = Array.from(rulesMap.get(left) ?? []).sort();
-      rules.push({
+      const productions = Array.from(rulesMap.get(left) ?? []).sort();
+      const existing = mergedRules.get(left);
+
+      if (existing) {
+        existing.productions = Array.from(new Set([...existing.productions, ...productions])).sort();
+        existing.isFinal = existing.isFinal || (finalMap.get(left) ?? false);
+        continue;
+      }
+
+      mergedRules.set(left, {
         left,
-        productions: prods,
+        productions,
         isStart: left === 'S',
         isFinal: finalMap.get(left) ?? false
       });
     }
 
-    return rules;
+    return Array.from(mergedRules.values());
   }
 }
