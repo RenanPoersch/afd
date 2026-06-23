@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AutomatoService } from './services/automato.service';
@@ -13,7 +13,7 @@ import { State } from './models/state';
   styleUrl: './app.scss'
 })
 
-export class App implements OnInit {
+export class App {
   // ========== GERENCIAMENTO DE TOKENS ==========
   newToken: string = '';
   tokens: string[] = [];
@@ -21,8 +21,6 @@ export class App implements OnInit {
 
   // ========== GERENCIAMENTO DO AUTÔMATO ==========
   states: Map<number, State> = new Map();
-  finalStates: Set<number> = new Set();
-  alphabet: string[] = [];
   transitionTable: {
     states: number[];
     alphabet: string[];
@@ -33,12 +31,10 @@ export class App implements OnInit {
   // ========== VALIDAÇÃO DE TOKENS ==========
   tokenToValidate: string = '';
   currentValidationState: number = 0;
-  validationPath: number[] = [0];
   validationResult: string = '';
   isValidating: boolean = false;
   validationSteps: Array<{
     symbol: string;
-    from: number;
     to: number;
   }> = [];
 
@@ -57,14 +53,13 @@ export class App implements OnInit {
     private grammarService: GrammarService
   ) {}
 
-  ngOnInit(): void {}
-
   addToken(): void {
     this.tokenError = '';
     const filteredToken = this.newToken.toLowerCase().replace(/[^a-z]/g, '');
 
     if (this.tokens.includes(filteredToken)) {
-      this.tokenError = `Token '${filteredToken}' já foi cadastrado!`;
+      const tokenLabel = filteredToken || 'ε';
+      this.tokenError = `Token '${tokenLabel}' já foi cadastrado!`;
       return;
     }
 
@@ -92,19 +87,15 @@ export class App implements OnInit {
     this.showAutomato = false;
     this.tokenError = '';
     this.states.clear();
-    this.finalStates.clear();
-    this.alphabet = [];
+    this.transitionTable = null;
     this.stats = null;
     this.grammarRules = [];
   }
 
   buildAutomato(): void {
-
     this.automatoService.buildAutomato(this.tokens);
 
     this.states = this.automatoService.getStates();
-    this.finalStates = this.automatoService.getFinalStates();
-    this.alphabet = this.automatoService.getAlphabet();
     this.transitionTable = this.automatoService.getTransitionTable();
     this.stats = this.automatoService.getAutomatoStats();
     this.grammarRules = this.grammarService.buildGrammarRules(this.states);
@@ -115,12 +106,11 @@ export class App implements OnInit {
   }
 
   isStateFinal(stateId: number): boolean {
-    return this.finalStates.has(stateId);
+    return this.states.get(stateId)?.isFinal ?? false;
   }
 
   resetValidation(): void {
     this.currentValidationState = 0;
-    this.validationPath = [0];
     this.validationResult = '';
     this.tokenToValidate = '';
     this.validationSteps = [];
@@ -161,12 +151,12 @@ export class App implements OnInit {
 
     const fromState = this.currentValidationState;
 
-    const result = this.automatoService.processSymbol(
+    const nextState = this.automatoService.processSymbol(
       fromState,
       symbol
     );
 
-    if (result.nextState === null) {
+    if (nextState === null) {
       this.validationResult =
         '❌ TOKEN INVÁLIDO - Símbolo não reconhecido!';
 
@@ -175,12 +165,10 @@ export class App implements OnInit {
       return;
     }
 
-    this.currentValidationState = result.nextState;
-    this.validationPath.push(this.currentValidationState);
+    this.currentValidationState = nextState;
 
     this.validationSteps.push({
       symbol,
-      from: fromState,
       to: this.currentValidationState
     });
 
@@ -188,14 +176,19 @@ export class App implements OnInit {
   }
 
   finalizeValidation(): void {
+    if (!this.tokenToValidate) {
+      this.currentValidationState = 0;
+      this.validationSteps = [];
+    }
 
-    const isFinalState = this.finalStates.has(this.currentValidationState);
+    const isFinalState = this.isStateFinal(this.currentValidationState);
 
     if (isFinalState) {
-      this.validationResult = `✅ TOKEN VÁLIDO: "${this.tokenToValidate}"`;
+      const recognizedToken = this.tokenToValidate || 'ε';
+      this.validationResult = `✅ TOKEN VÁLIDO: "${recognizedToken}"`;
 
-      if (!this.validTokensRecognized.includes(this.tokenToValidate)) {
-        this.validTokensRecognized.push(this.tokenToValidate);
+      if (!this.validTokensRecognized.includes(recognizedToken)) {
+        this.validTokensRecognized.push(recognizedToken);
       }
     } else {
       this.validationResult = `❌ TOKEN INVÁLIDO`;
@@ -203,19 +196,6 @@ export class App implements OnInit {
 
     this.isValidating = false;
     this.tokenToValidate = '';
-  }
-
-  getStateStyle(stateId: number): { [key: string]: string } {
-    const isCurrentState = stateId === this.currentValidationState && this.isValidating;
-    const isFinal = this.isStateFinal(stateId);
-
-    if (isCurrentState) {
-      return { 'background-color': '#3498db', color: 'white' };
-    } else if (isFinal) {
-      return { 'background-color': '#27ae60', color: 'white' };
-    } else {
-      return { 'background-color': '#ecf0f1', color: '#333' };
-    }
   }
 
   getTransitionValue(stateId: number, symbol: string): string {

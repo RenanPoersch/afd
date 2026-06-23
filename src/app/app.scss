@@ -10,26 +10,6 @@ $color-gray: #95a5a6;
 
 $transition-smooth: all 0.3s ease;
 
-// ========== RESET E ESTILOS BASE ==========
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-:host {
-  --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  font-family: var(--font-family);
-}
-
-body {
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-  min-height: 100vh;
-  font-family: var(--font-family);
-  color: $color-dark;
-  line-height: 1.6;
-}
-
 // ========== CONTAINER PRINCIPAL ==========
 .app-container {
   min-height: 100vh;
@@ -52,16 +32,6 @@ body {
     font-weight: 700;
     margin-bottom: 0.5rem;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
-
-    @media (max-width: 768px) {
-      font-size: 1.8rem;
-    }
-  }
-
-  .subtitle {
-    font-size: 1.1rem;
-    opacity: 0.95;
-    font-style: italic;
   }
 }
 
@@ -72,10 +42,6 @@ body {
   margin: 0 auto;
   padding: 0 2rem 3rem;
   width: 100%;
-
-  @media (max-width: 768px) {
-    padding: 0 1rem 2rem;
-  }
 }
 
 // ========== CARDS ==========
@@ -102,12 +68,6 @@ body {
       margin-bottom: 0.5rem;
       color: $color-dark;
     }
-
-    .section-description {
-      color: $color-gray;
-      font-size: 0.95rem;
-      margin: 0;
-    }
   }
 
   .card-body {
@@ -121,10 +81,6 @@ body {
   gap: 1rem;
   margin-bottom: 1.5rem;
   flex-direction: column;
-
-  @media (max-width: 768px) {
-    flex-direction: column;
-  }
 }
 
 .input-field {
@@ -235,16 +191,6 @@ body {
   &:hover:not(:disabled) {
     background-color: color-mix(in srgb, $color-danger 80%, black);
     box-shadow: 0 4px 8px rgba(231, 76, 60, 0.3);
-  }
-}
-
-.btn-info {
-  background-color: $color-info;
-  color: white;
-
-  &:hover:not(:disabled) {
-    background-color: color-mix(in srgb, $color-info 80%, black);
-    box-shadow: 0 4px 8px rgba(41, 128, 185, 0.3);
   }
 }
 
@@ -379,68 +325,6 @@ body {
 }
 
 // ========== VISUALIZAÇÃO DO AUTÔMATO ==========
-.automato-visualization {
-  margin-bottom: 2rem;
-
-  h3 {
-    margin-bottom: 1rem;
-    color: $color-dark;
-    font-size: 1.2rem;
-  }
-}
-
-.states-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  padding: 1rem;
-  background-color: #f8f9fa;
-  border-radius: 8px;
-  min-height: 80px;
-  align-content: flex-start;
-}
-
-.state-node {
-  width: 46px;
-  height: 46px;
-  border-radius: 50%;
-  background-color: $color-light;
-  border: 2px solid color-mix(in srgb, $color-gray 70%, white);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  transition: $transition-smooth;
-  position: relative;
-  font-weight: 600;
-  color: $color-dark;
-
-  &:hover {
-    transform: scale(1.1);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  }
-
-  .state-label {
-    font-size: 0.75rem;
-  }
-
-  .state-icon {
-    position: absolute;
-    top: -6px;
-    right: -6px;
-    background-color: $color-success;
-    color: white;
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.65rem;
-    font-weight: 700;
-  }
-}
-
 // ========== TABELA DE TRANSIÇÃO ==========
 .transition-table-container {
   margin-bottom: 2rem;
@@ -602,10 +486,6 @@ body {
   border-radius: 8px;
   overflow-x: auto;
 
-  @media (max-width: 768px) {
-    flex-direction: column;
-    align-items: flex-start;
-  }
 }
 
 .step-line {
@@ -640,39 +520,6 @@ body {
     color: $color-danger;
     border-left-color: $color-danger;
   }
-}
-
-.step-state {
-  background-color: $color-light;
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  font-weight: 600;
-  font-family: 'Courier New', monospace;
-  color: $color-dark;
-  border: 2px solid $color-gray;
-}
-
-.step-label {
-  font-size: 0.85rem;
-  color: $color-gray;
-  font-style: italic;
-}
-
-.step-arrow {
-  color: $color-primary;
-  font-weight: 700;
-  font-size: 1.2rem;
-}
-
-.step-symbol {
-  background-color: $color-warning;
-  color: white;
-  padding: 0.5rem 0.75rem;
-  border-radius: 6px;
-  font-weight: 700;
-  font-family: 'Courier New', monospace;
-  min-width: 30px;
-  text-align: center;
 }
 
 // ========== GRAMÁTICA GERADA ==========
@@ -822,36 +669,6 @@ body {
   }
 }
 
-// ========== RODAPÉ ==========
-.app-footer {
-  background: linear-gradient(135deg, $color-dark 0%, #34495e 100%);
-  color: white;
-  text-align: center;
-  padding: 2rem;
-  margin-top: auto;
-  border-top: 4px solid $color-primary;
-
-  p {
-    margin-bottom: 0.5rem;
-    font-size: 0.9rem;
-
-    &:last-child {
-      margin-bottom: 0;
-      opacity: 0.8;
-      font-style: italic;
-    }
-
-    strong {
-      color: #ecf0f1;
-      font-weight: 600;
-    }
-  }
-
-  @media (max-width: 768px) {
-    font-size: 0.85rem;
-  }
-}
-
 // ========== RESPONSIVIDADE ==========
 @media (max-width: 1200px) {
   .app-main {
@@ -866,10 +683,6 @@ body {
     h1 {
       font-size: 1.8rem;
     }
-
-    .subtitle {
-      font-size: 1rem;
-    }
   }
 
   .card {
@@ -880,31 +693,9 @@ body {
     }
   }
 
-  .states-container {
-    justify-content: center;
-  }
-
   .steps-timeline {
     gap: 0.25rem;
     padding: 0.75rem;
-  }
-
-  .step {
-    font-size: 0.9rem;
-
-    &.step-start,
-    &.step-end {
-      margin-top: 0.5rem;
-    }
-  }
-
-  .step-state {
-    padding: 0.4rem 0.8rem;
-    font-size: 0.85rem;
-  }
-
-  .step-arrow {
-    display: none;
   }
 }
 
@@ -921,7 +712,6 @@ body {
   }
 
   @media (max-width: 768px) {
-    grid-template-columns: 1fr;
     gap: 1rem;
   }
 }

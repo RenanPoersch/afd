@@ -7,9 +7,7 @@ import { State } from '../models/state';
 export class AutomatoService {
   private states: Map<number, State> = new Map();
   private stateCounter: number = 0;
-  private finalStates: Set<number> = new Set();
   private alphabet: Set<string> = new Set();
-
 
   constructor() {
     this.initializeAutomato();
@@ -17,7 +15,6 @@ export class AutomatoService {
 
   private initializeAutomato(): void {
     this.states.clear();
-    this.finalStates.clear();
     this.alphabet.clear();
     this.stateCounter = 0;
     
@@ -27,7 +24,6 @@ export class AutomatoService {
   private createState(): number {
     const id = this.stateCounter++;
     const newState: State = {
-      id,
       isFinal: false,
       transitions: new Map()
     };
@@ -59,36 +55,25 @@ export class AutomatoService {
         }
       }
 
-      this.finalStates.add(currentState);
       this.states.get(currentState)!.isFinal = true;
     }
   }
 
-  processSymbol(currentState: number, symbol: string): { nextState: number | null; isValid: boolean } {
+  processSymbol(currentState: number, symbol: string): number | null {
     const state = this.states.get(currentState);
-    
+
     if (!state) {
-      return { nextState: null, isValid: false };
+      return null;
     }
 
-    const nextState = state.transitions.get(symbol) ?? null;
-    
-    if (nextState === null) {
-      return { nextState: null, isValid: false };
-    }
-
-    return { nextState, isValid: true };
+    return state.transitions.get(symbol) ?? null;
   }
 
   getStates(): Map<number, State> {
     return new Map(this.states);
   }
 
-  getFinalStates(): Set<number> {
-    return new Set(this.finalStates);
-  }
-
-  getAlphabet(): string[] {
+  private getAlphabet(): string[] {
     return Array.from(this.alphabet).sort();
   }
 
@@ -99,7 +84,7 @@ export class AutomatoService {
   } {
     const alphabet = this.getAlphabet();
     const stateIds = Array.from(this.states.keys()).sort((a, b) => a - b);
-    
+
     const transitions = new Map<string, Map<string, string>>();
     
     for (const stateId of stateIds) {
@@ -135,7 +120,9 @@ export class AutomatoService {
 
     return {
       totalStates: this.states.size,
-      totalFinalStates: this.finalStates.size,
+      totalFinalStates: Array.from(this.states.values()).filter(
+        (state) => state.isFinal
+      ).length,
       alphabetSize: this.alphabet.size,
       totalTransitions
     };

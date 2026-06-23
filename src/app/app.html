@@ -1,12 +1,12 @@
 <div class="app-container">
   <header class="app-header">
-    <div class="header-content">
+    <div>
       <h1>Analisador Léxico</h1>
     </div>
   </header>
 
   <main class="app-main">
-    <section class="card section-tokens">
+    <section class="card">
       <div class="card-header">
         <h2>Cadastro de Tokens</h2>
       </div>
@@ -34,7 +34,7 @@
           <h3>Tokens Cadastrados:</h3>
           <div class="tokens-grid">
             <div *ngFor="let token of tokens; let i = index" class="token-badge">
-              <span class="token-text">{{ token }}</span>
+              <span class="token-text">{{ token || 'ε' }}</span>
               <button
                 (click)="removeToken(i)"
                 class="btn-remove"
@@ -62,7 +62,7 @@
     </section>
 
     <div *ngIf="showAutomato" class="sections-wrapper">
-      <section class="card section-automato">
+      <section class="card">
         <div class="card-header">
           <h2>Autômato Finito Determinístico</h2>
         </div>
@@ -119,7 +119,7 @@
         </div>
       </section>
 
-      <section class="card section-validation">
+      <section class="card">
         <div class="card-header">
           <h2>Validação</h2>
         </div>
