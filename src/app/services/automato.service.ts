@@ -57,6 +57,64 @@ export class AutomatoService {
 
       this.states.get(currentState)!.isFinal = true;
     }
+
+    this.mergeFinalLeafStates();
+  }
+
+  private mergeFinalLeafStates(): void {
+    const finalLeafIds = Array.from(this.states.entries())
+      .filter(([, state]) => state.isFinal && state.transitions.size === 0)
+      .map(([stateId]) => stateId)
+      .sort((a, b) => a - b);
+
+    if (finalLeafIds.length <= 1) {
+      return;
+    }
+
+    const sharedFinalId = finalLeafIds[0];
+    const redundantFinalIds = new Set(finalLeafIds.slice(1));
+
+    for (const state of this.states.values()) {
+      for (const [symbol, destinationId] of state.transitions) {
+        if (redundantFinalIds.has(destinationId)) {
+          state.transitions.set(symbol, sharedFinalId);
+        }
+      }
+    }
+
+    for (const stateId of redundantFinalIds) {
+      this.states.delete(stateId);
+    }
+
+    this.renumberStates();
+  }
+
+  private renumberStates(): void {
+    const oldStateIds = Array.from(this.states.keys()).sort((a, b) => a - b);
+    const newIds = new Map<number, number>();
+
+    oldStateIds.forEach((stateId, index) => {
+      newIds.set(stateId, index);
+    });
+
+    const renumberedStates = new Map<number, State>();
+
+    for (const oldStateId of oldStateIds) {
+      const state = this.states.get(oldStateId)!;
+      const transitions = new Map<string, number>();
+
+      for (const [symbol, destinationId] of state.transitions) {
+        transitions.set(symbol, newIds.get(destinationId)!);
+      }
+
+      renumberedStates.set(newIds.get(oldStateId)!, {
+        isFinal: state.isFinal,
+        transitions
+      });
+    }
+
+    this.states = renumberedStates;
+    this.stateCounter = this.states.size;
   }
 
   processSymbol(currentState: number, symbol: string): number | null {

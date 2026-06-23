@@ -74,10 +74,6 @@
               <span class="stat-label">Estados</span>
             </div>
             <div class="stat-card">
-              <span class="stat-value">{{ stats.totalFinalStates }}</span>
-              <span class="stat-label">Estados Finais</span>
-            </div>
-            <div class="stat-card">
               <span class="stat-value">{{ stats.alphabetSize }}</span>
               <span class="stat-label">Símbolos (Alfabeto)</span>
             </div>
@@ -105,7 +101,7 @@
                     [ngClass]="{ 'final-state': isStateFinal(state) }"
                   >
                     <td class="state-label-cell">
-                      q{{ state }}<span *ngIf="isStateFinal(state)" class="final-marker">*</span>
+                      <span *ngIf="state === 0" style="transform: translateX(-10px);">-> </span>q{{ state }}<span *ngIf="isStateFinal(state)" class="final-marker">*</span>
                     </td>
                     <td *ngFor="let symbol of transitionTable.alphabet">
                       {{ getTransitionValue(state, symbol) }}
