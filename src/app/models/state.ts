@@ -18,12 +18,3 @@ export interface ValidationResult {
   currentState: number; // Estado em que terminou
   path: number[];       // Caminho percorrido pelos estados
 }
-
-/**
- * Interface para rastrear o histórico de um token sendo validado
- */
-export interface TokenValidationStep {
-  symbol: string;       // Símbolo processado
-  fromState: number;    // Estado anterior
-  toState: number;      // Estado novo
-}

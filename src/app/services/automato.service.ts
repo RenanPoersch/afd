@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { State, ValidationResult, TokenValidationStep } from '../models/state';
+import { State } from '../models/state';
 
 @Injectable({
   providedIn: 'root'
@@ -9,8 +9,7 @@ export class AutomatoService {
   private stateCounter: number = 0;
   private finalStates: Set<number> = new Set();
   private alphabet: Set<string> = new Set();
-  
-  private validationHistory: TokenValidationStep[] = [];
+
 
   constructor() {
     this.initializeAutomato();
@@ -21,12 +20,11 @@ export class AutomatoService {
     this.finalStates.clear();
     this.alphabet.clear();
     this.stateCounter = 0;
-    this.validationHistory = [];
     
-    this.createState(true);
+    this.createState();
   }
 
-  private createState(isInitial: boolean = false): number {
+  private createState(): number {
     const id = this.stateCounter++;
     const newState: State = {
       id,
@@ -40,22 +38,9 @@ export class AutomatoService {
   buildAutomato(tokens: string[]): void {
     this.initializeAutomato();
 
-    if (tokens.length === 0) {
-      return;
-    }
-
     for (const token of tokens) {
 
       let currentState = 0;
-
-      if (token.length === 0) {
-        this.finalStates.add(0);
-        const rootState = this.states.get(0);
-        if (rootState) {
-          rootState.isFinal = true;
-        }
-        continue;
-      }
 
       for (const symbol of token) {
         this.alphabet.add(symbol);
@@ -75,39 +60,8 @@ export class AutomatoService {
       }
 
       this.finalStates.add(currentState);
-      const finalState = this.states.get(currentState);
-      if (finalState) {
-        finalState.isFinal = true;
-      }
+      this.states.get(currentState)!.isFinal = true;
     }
-  }
-
-  validateToken(token: string): ValidationResult {
-    this.validationHistory = [];
-    let currentState = 0;
-    const path = [currentState];
-    let isValid = true;
-
-    for (const symbol of token) {
-      const result = this.processSymbol(currentState, symbol);
-      
-      if (result.nextState === null) {
-        isValid = false;
-        break;
-      }
-      
-      currentState = result.nextState;
-      path.push(currentState);
-    }
-
-    const isFinalState = this.finalStates.has(currentState);
-    isValid = isValid && isFinalState;
-
-    return {
-      isValid,
-      currentState,
-      path
-    };
   }
 
   processSymbol(currentState: number, symbol: string): { nextState: number | null; isValid: boolean } {
@@ -122,12 +76,6 @@ export class AutomatoService {
     if (nextState === null) {
       return { nextState: null, isValid: false };
     }
-
-    this.validationHistory.push({
-      symbol,
-      fromState: currentState,
-      toState: nextState,
-    });
 
     return { nextState, isValid: true };
   }
@@ -172,14 +120,6 @@ export class AutomatoService {
       alphabet,
       transitions
     };
-  }
-
-  getValidationHistory(): TokenValidationStep[] {
-    return [...this.validationHistory];
-  }
-
-  clearValidationHistory(): void {
-    this.validationHistory = [];
   }
 
   getAutomatoStats(): {

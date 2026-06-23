@@ -61,18 +61,7 @@ export class App implements OnInit {
 
   addToken(): void {
     this.tokenError = '';
-
-    if (!this.newToken.trim()) {
-      this.tokenError = 'Token não pode estar vazio!';
-      return;
-    }
-
     const filteredToken = this.newToken.toLowerCase().replace(/[^a-z]/g, '');
-
-    if (!filteredToken) {
-      this.tokenError = 'Token deve conter pelo menos uma letra minúscula (a-z)!';
-      return;
-    }
 
     if (this.tokens.includes(filteredToken)) {
       this.tokenError = `Token '${filteredToken}' já foi cadastrado!`;
@@ -118,7 +107,7 @@ export class App implements OnInit {
     this.alphabet = this.automatoService.getAlphabet();
     this.transitionTable = this.automatoService.getTransitionTable();
     this.stats = this.automatoService.getAutomatoStats();
-    this.grammarRules = this.grammarService.buildGrammarRules(this.tokens);
+    this.grammarRules = this.grammarService.buildGrammarRules(this.states);
 
     this.showAutomato = true;
     this.resetValidation();
@@ -135,48 +124,24 @@ export class App implements OnInit {
     this.validationResult = '';
     this.tokenToValidate = '';
     this.validationSteps = [];
-    this.automatoService.clearValidationHistory();
   }
 
   onValidationKeyPress(event: KeyboardEvent): void {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      this.resetValidation();
+      this.isValidating = true;
+      return;
+    }
+
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
       this.finalizeValidation();
       return;
     }
 
-    if (!this.isValidating && this.validationResult) {
-      const symbol = event.key.toLowerCase();
-      if (/^[a-z]$/.test(symbol)) {
-        event.preventDefault();
-        this.resetValidation();
-        this.isValidating = true;
-        
-        const result = this.automatoService.processSymbol(0, symbol);
-        if (result.nextState === null) {
-          this.validationResult = '❌ TOKEN INVÁLIDO - Símbolo não reconhecido!';
-          this.tokenToValidate = '';
-          return;
-        }
-        
-        // validate symbol
-        this.currentValidationState = result.nextState;
-        this.validationPath.push(this.currentValidationState);
-        this.validationSteps.push({
-          symbol,
-          from: 0,
-          to: this.currentValidationState
-        });
-        this.tokenToValidate += symbol;
-      }
-      return;
-    }
-
-    if (!this.isValidating) return;
-
     const symbol = event.key.toLowerCase();
-    
-    // Apenas letras minúsculas
+
     if (!/^[a-z]$/.test(symbol)) {
       event.preventDefault();
       return;
@@ -184,34 +149,45 @@ export class App implements OnInit {
 
     event.preventDefault();
 
-    // Validar transição
-    const result = this.automatoService.processSymbol(this.currentValidationState, symbol);
-    
+    // iniciar nova validation se a outra terminou
+    if (!this.isValidating && this.validationResult) {
+      this.resetValidation();
+      this.isValidating = true;
+    }
+
+    if (!this.isValidating) {
+      return;
+    }
+
+    const fromState = this.currentValidationState;
+
+    const result = this.automatoService.processSymbol(
+      fromState,
+      symbol
+    );
+
     if (result.nextState === null) {
-      // Transição inválida
-      this.validationResult = '❌ TOKEN INVÁLIDO - Símbolo não reconhecido!';
+      this.validationResult =
+        '❌ TOKEN INVÁLIDO - Símbolo não reconhecido!';
+
       this.tokenToValidate = '';
       this.isValidating = false;
       return;
     }
 
-    // Adicionar ao campo apenas se transição é válida
-    const fromState = this.currentValidationState;
     this.currentValidationState = result.nextState;
     this.validationPath.push(this.currentValidationState);
+
     this.validationSteps.push({
       symbol,
       from: fromState,
       to: this.currentValidationState
     });
+
     this.tokenToValidate += symbol;
   }
 
   finalizeValidation(): void {
-    if (this.tokenToValidate.trim().length === 0) {
-      this.validationResult = '';
-      return;
-    }
 
     const isFinalState = this.finalStates.has(this.currentValidationState);
 
